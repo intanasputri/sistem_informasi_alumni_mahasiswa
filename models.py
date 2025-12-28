@@ -9,7 +9,7 @@ class Database:
             user=os.getenv("MYSQLUSER"),
             password=os.getenv("MYSQLPASSWORD"),
             database=os.getenv("MYSQLDATABASE"),
-            port=int(os.getenv("MYSQLPORT")),
+            port=int(os.getenv("MYSQLPORT", 51174)),
             cursorclass=pymysql.cursors.DictCursor,
             ssl={"ssl": {}}
         )
