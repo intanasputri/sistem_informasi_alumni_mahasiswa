@@ -4,13 +4,14 @@ from werkzeug.security import generate_password_hash, check_password_hash
 class Database:
     def __init__(self):
         self.connection = pymysql.connect(
-            host='localhost',
-            user='root',
-            password='',
-            database='sistem_informasi_alumni',
-            cursorclass=pymysql.cursors.DictCursor
+            host=os.getenv("ballast.proxy.rlwy.net"),
+            user=os.getenv("root"),
+            password=os.getenv("LhndAcKTESYmMVIiDPRFbvHgWvWYTrIP"),
+            database=os.getenv("railway"),
+            port=int(os.getenv("51174")),
+            cursorclass=pymysql.cursors.DictCursor,
+            ssl={"ssl": {}} 
         )
-
     def query(self, sql, params=None):
         cursor = self.connection.cursor()
         cursor.execute(sql, params)
