@@ -4,12 +4,19 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 class Database:
     def __init__(self):
+        # Ambil MYSQL_URL dari Railway
+        db_url = os.getenv("MYSQL_URL")
+        if not db_url:
+            raise RuntimeError("ENV 'MYSQL_URL' tidak ditemukan. Pastikan service MySQL sudah terhubung.")
+
+        # Parse URL
+        result = urlparse(db_url)
         self.connection = pymysql.connect(
-            host=os.getenv("MYSQLHOST"),
-            user=os.getenv("MYSQLUSER"),
-            password=os.getenv("MYSQLPASSWORD"),
-            database=os.getenv("MYSQLDATABASE"),
-            port=int(os.getenv("MYSQLPORT", 51174)),
+            host=result.hostname,
+            user=result.username,
+            password=result.password,
+            database=result.path[1:],  # strip leading '/'
+            port=result.port or 3306,
             cursorclass=pymysql.cursors.DictCursor,
             ssl={"ssl": {}}
         )
