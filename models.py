@@ -5,31 +5,26 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 class Database:
     def __init__(self):
-        self.connection = None
+        mysql_url = os.getenv("MYSQL_URL")
+        if not mysql_url:
+            raise Exception("Environment variable MYSQL_URL belum di-set")
 
-    def connect(self):
-        if self.connection is None:
-            db_url = os.getenv("MYSQL_URL")
-            if not db_url:
-                raise RuntimeError("ENV 'MYSQL_URL' tidak ditemukan")
-            
-            result = urlparse(db_url)
-            self.connection = pymysql.connect(
-                host=result.hostname,
-                user=result.username,
-                password=result.password,
-                database=result.path[1:],
-                port=result.port or 3306,
-                cursorclass=pymysql.cursors.DictCursor,
-                ssl={"ssl": {}}
-            )
-        return self.connection
+        result = urlparse(mysql_url)
+
+        self.connection = pymysql.connect(
+            host=result.hostname,
+            user=result.username,
+            password=result.password,
+            database=result.path[1:], 
+            port=result.port or 3306,
+            cursorclass=pymysql.cursors.DictCursor,
+            ssl={"ssl": {}}
+        )
 
     def query(self, sql, params=None):
-        conn = self.connect()
-        cursor = conn.cursor()
+        cursor = self.connection.cursor()
         cursor.execute(sql, params)
-        conn.commit()
+        self.connection.commit()
         return cursor
 
     def fetchall(self, sql, params=None):
@@ -40,7 +35,6 @@ class Database:
         cursor = self.query(sql, params)
         return cursor.fetchone()
 
-# Buat object db sekali
 db = Database()
 
 class DaftarProdi:
