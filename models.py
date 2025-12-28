@@ -5,36 +5,42 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 class Database:
     def __init__(self):
-        # Ambil MYSQL_URL dari Railway
-        db_url = os.getenv("MYSQL_URL")
-        if not db_url:
-            raise RuntimeError("ENV 'MYSQL_URL' tidak ditemukan. Pastikan service MySQL sudah terhubung.")
+        self.connection = None
 
-        # Parse URL
-        result = urlparse(db_url)
-        self.connection = pymysql.connect(
-            host=result.hostname,
-            user=result.username,
-            password=result.password,
-            database=result.path[1:],  # strip leading '/'
-            port=result.port or 3306,
-            cursorclass=pymysql.cursors.DictCursor,
-            ssl={"ssl": {}}
-        )
+    def connect(self):
+        if self.connection is None:
+            db_url = os.getenv("MYSQL_URL")
+            if not db_url:
+                raise RuntimeError("ENV 'MYSQL_URL' tidak ditemukan")
+            
+            result = urlparse(db_url)
+            self.connection = pymysql.connect(
+                host=result.hostname,
+                user=result.username,
+                password=result.password,
+                database=result.path[1:],
+                port=result.port or 3306,
+                cursorclass=pymysql.cursors.DictCursor,
+                ssl={"ssl": {}}
+            )
+        return self.connection
+
     def query(self, sql, params=None):
-        cursor = self.connection.cursor()
+        conn = self.connect()
+        cursor = conn.cursor()
         cursor.execute(sql, params)
-        self.connection.commit()
+        conn.commit()
         return cursor
-    
+
     def fetchall(self, sql, params=None):
         cursor = self.query(sql, params)
         return cursor.fetchall()
-    
+
     def fetchone(self, sql, params=None):
         cursor = self.query(sql, params)
         return cursor.fetchone()
-    
+
+# Buat object db sekali
 db = Database()
 
 class DaftarProdi:
