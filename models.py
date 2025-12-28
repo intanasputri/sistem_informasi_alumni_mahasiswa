@@ -1,5 +1,6 @@
 import os
 import pymysql
+from urllib.parse import urlparse
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class Database:
